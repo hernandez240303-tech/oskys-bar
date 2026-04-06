@@ -247,14 +247,15 @@ canvas.width = W; canvas.height = H;
    🎵 CONTROL DE AUDIO (Fade-in y corte)
 =========================================== */
 const gameMusic = new Audio('musica.mp3');
-gameMusic.loop = true; // Para que se repita infinitamente
+const gameOverMusic = new Audio('musica2.mp3'); // 🎵 Nuevo sonido de derrota
+gameMusic.loop = true; 
+gameOverMusic.loop = false; // No se repite
 
 function playMusicWithFade() {
-    gameMusic.volume = 0; // Empezamos en silencio
-    gameMusic.currentTime = 2; // <--- ¡Ajustado! Ahora arranca directo en el segundo 2
-    gameMusic.play().catch(e => console.log("El navegador bloqueó el autoplay. Se activará con el primer toque."));
+    gameMusic.volume = 0; 
+    gameMusic.currentTime = 2; // Arranca en el segundo 2
+    gameMusic.play().catch(e => console.log("El navegador bloqueó el autoplay."));
     
-    // Subimos el volumen poco a poco durante 2 segundos
     let fadeInInterval = setInterval(() => {
         if (gameMusic.volume < 0.9) {
             gameMusic.volume += 0.05;
@@ -267,7 +268,13 @@ function playMusicWithFade() {
 
 function stopMusic() {
     gameMusic.pause();
-    gameMusic.currentTime = 2; // Lo regresamos al segundo 2 para la siguiente ronda
+    gameMusic.currentTime = 2; 
+}
+
+function playGameOverMusic() {
+    gameOverMusic.currentTime = 0; // Desde el inicio
+    gameOverMusic.volume = 1.0;
+    gameOverMusic.play().catch(e => console.log("Error al reproducir audio de muerte."));
 }
 /* ========================================= */
 
@@ -416,7 +423,6 @@ function startGame() {
     hudCoins.classList.remove('hidden');
     document.getElementById('hud-coins-text').innerText = "0";
 
-    // 🎵 Iniciar música con fade-in y salto al segundo 2
     playMusicWithFade();
 
     pipeTimer = 0; state.mode = "PLAY";
@@ -437,8 +443,9 @@ function gameOver() {
         return; 
     }
 
-    // 🎵 Cortar la música de golpe al morir
+    // 🎵 Cortar la música principal y disparar sonido de muerte
     stopMusic();
+    playGameOverMusic();
 
     state.mode = "OVER";
     state.shake = 20;
